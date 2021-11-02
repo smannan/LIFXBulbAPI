@@ -1,14 +1,20 @@
 
+import os 
+import pickle
+
 from flask import Flask
 from flask import request
 from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
 
+dir_path = os.path.dirname(os.path.realpath(__file__))
+LIFX_model = pickle.load(open('{0}/models/smart_bulb_arima.pkl'.format(dir_path), 'rb'))
+
 @app.route('/predict/LIFX/')
 def getLIFXForecast():
     return {
-        'cost': 0.005,
+        'cost': LIFX_model.forecast()[0],
         'interval_length': '1',
         'interval_unit': 'hour'
     }
