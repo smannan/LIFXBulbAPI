@@ -5,6 +5,7 @@ import pickle
 from flask import Flask
 from flask import request
 from flask_cors import CORS, cross_origin
+from keras.models import model_from_json
 
 app = Flask(__name__)
 
