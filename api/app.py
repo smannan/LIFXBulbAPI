@@ -22,6 +22,11 @@ bucket = 'PGE_CSV_DATA'
 org = 'praveenkumar23.anguru@gmail.com'
 pge_n_steps = 7
 
+hours_per_month = 730
+hours_per_day = 24
+days_per_month = 30
+num_bulbs = 2
+
 # create client to run influx queries
 def create_influx_client(bucket):
     token = 'uaElnni__FwThkojQgBlw069cZzqFiehCwog5QmiSsOKPSSdEj7O1PK8qDd_alm253SL8ZHj6PRhKuUclUXDDw=='
@@ -78,21 +83,46 @@ client = create_influx_client(bucket)
 
 @app.route('/predict/LIFX/')
 def getLIFXForecast():
+    forecast = LIFX_model.forecast()[0]
+    interval = request.args.get('interval')
+
+    # forecasts are in hour by default
+    # x2 because each forecast is for one bulb
+    if (interval == 'days'):
+        cost = forecast * num_bulbs * hours_per_day
+    elif (interval == 'months'):
+        cost = forecast * num_bulbs * hours_per_month
+    else:
+        return { 'error': '{0} interval is not supported'.format(interval) }
+
     return json.dumps([{
-        'cost': LIFX_model.forecast()[0],
+        'cost': cost,
         'interval_length': '1',
-        'interval_unit': 'hour'
+        'interval_unit': interval
     }])
 
 @app.route('/predict/PGE/')
 def getPGEForecast():
-    cost = query_field(client, bucket, org, pge_n_steps)
-    cost = cost.reshape((cost.shape[0], cost.shape[1], 1))
+    # get the next forecast based on the last 7 days
+    previous_costs = query_field(client, bucket, org, pge_n_steps)
+    previous_costs = previous_costs.reshape((previous_costs.shape[0], previous_costs.shape[1], 1))
+    forecast = float(PGE_model.predict(previous_costs)[0][0])
+
+    interval = request.args.get('interval')
+
+    # convert based on interval
+    # forecasts are daily by default
+    if (interval == 'days'):
+        cost = forecast
+    elif (interval == 'months'):
+        cost = forecast * days_per_month
+    else:
+        return { 'error': '{0} interval is not supported'.format(interval) }
 
     return json.dumps([{
-        'cost': float(PGE_model.predict(cost)[0][0]),
+        'cost': cost,
         'interval_length': '1',
-        'interval_unit': 'day'
+        'interval_unit': interval
     }])
 
 @app.route('/')
