@@ -1,4 +1,5 @@
 
+import json
 import numpy as np
 import os
 import pandas as pd
@@ -77,22 +78,22 @@ client = create_influx_client(bucket)
 
 @app.route('/predict/LIFX/')
 def getLIFXForecast():
-    return {
+    return json.dumps([{
         'cost': LIFX_model.forecast()[0],
         'interval_length': '1',
         'interval_unit': 'hour'
-    }
+    }])
 
 @app.route('/predict/PGE/')
 def getPGEForecast():
     cost = query_field(client, bucket, org, pge_n_steps)
     cost = cost.reshape((cost.shape[0], cost.shape[1], 1))
 
-    return {
+    return json.dumps([{
         'cost': float(PGE_model.predict(cost)[0][0]),
         'interval_length': '1',
         'interval_unit': 'day'
-    }
+    }])
 
 @app.route('/')
 def welcome():
