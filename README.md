@@ -8,10 +8,12 @@ energy costs for LIFX bulbs and PG&E smart meters.
 
 Python 3.9.2
 
+```
 pip3 install tensorflow
 pip3 install flask-restplus
 pip3 install 'statsmodels==0.12.2'
 pip3 install influxdb_client
+```
 
 # To run
 
