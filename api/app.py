@@ -1,5 +1,6 @@
 
 import json
+import math
 import numpy as np
 import os
 import pandas as pd
@@ -54,7 +55,7 @@ def query_field(client, bucket, org, steps):
     df['time'] = df['time'].dt.round('D')
     df = df.groupby(['time']).agg({'cost': 'sum'}).reset_index()
 
-    return np.array([df['cost'].tolist()[-steps:]])
+    return df['cost'].tolist()[-steps:]
 
 # load ARIMS model from pickle file
 def load_LIFX_model(filename):
@@ -111,24 +112,37 @@ def getLIFXForecast():
 def getPGEForecast():
     # get the next forecast based on the last 7 days
     previous_costs = query_field(client, bucket, org, pge_n_steps)
-    previous_costs = previous_costs.reshape((previous_costs.shape[0], previous_costs.shape[1], 1))
-    forecast = float(PGE_model.predict(previous_costs)[0][0])
 
+    # get interval unit from query
     interval = request.args.get('interval')
 
-    # convert based on interval
-    # forecasts are daily by default
-    if (interval == 'days'):
-        cost = forecast
-    elif (interval == 'months'):
-        cost = forecast * days_per_month
+    if (request.args.get('steps') != None):
+        steps = min(int(request.args.get('steps')), max_steps)
     else:
-        return { 'error': '{0} interval is not supported'.format(interval) }
+        steps = 1
 
-    data = [cost]
+    data = []
+    for i in range(steps):
+        input_data = np.array([previous_costs])
+        input_data = input_data.reshape((input_data.shape[0], input_data.shape[1], 1))
+        forecast = math.fabs(float(PGE_model.predict(input_data)[0][0]))
+
+        # convert based on interval
+        # forecasts are daily by default
+        if (interval == 'days'):
+            data.append(forecast)
+        elif (interval == 'months'):
+            data.append(forecast * days_per_month)
+        else:
+            return { 'error': '{0} interval is not supported'.format(interval) }
+
+        # remove first item, add forecast, and get the next prediction
+        previous_costs.pop(0)
+        previous_costs.append(forecast)
+
     return json.dumps({
         'data': data,
-        'interval_length': 1,
+        'interval_length': steps,
         'interval_unit': interval
     })
 
