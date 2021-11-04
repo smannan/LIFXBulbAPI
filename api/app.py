@@ -80,26 +80,32 @@ def load_PGE_model(model_filename, weights_filename):
 LIFX_model = load_LIFX_model(LIFX_filename)
 PGE_model = load_PGE_model(PGE_filename, PGE_weights)
 client = create_influx_client(bucket)
+max_steps = 10
 
 @app.route('/predict/LIFX/')
 def getLIFXForecast():
-    forecast = LIFX_model.forecast()[0]
     interval = request.args.get('interval')
 
-    # forecasts are in hour by default
-    # x2 because each forecast is for one bulb
-    if (interval == 'days'):
-        cost = forecast * num_bulbs * hours_per_day
-    elif (interval == 'months'):
-        cost = forecast * num_bulbs * hours_per_month
+    if (request.args.get('steps') != None):
+        steps = min(int(request.args.get('steps')), max_steps)
     else:
-        return { 'error': '{0} interval is not supported'.format(interval) }
+        steps = 1
 
-    return json.dumps([{
-        'cost': cost,
-        'interval_length': '1',
+    forecasts = LIFX_model.forecast(steps=steps).tolist()
+    data = []
+    for forecast in forecasts:
+        if interval == 'days':
+            data.append(forecast * num_bulbs * hours_per_day)
+        elif interval == 'months':
+            data.append(forecast * num_bulbs * hours_per_month)
+        else:
+            return {error: '{0} interval is not supported'.format(interval)}
+
+    return json.dumps({
+        'data': data,
+        'interval_length': steps,
         'interval_unit': interval
-    }])
+    })
 
 @app.route('/predict/PGE/')
 def getPGEForecast():
@@ -119,11 +125,12 @@ def getPGEForecast():
     else:
         return { 'error': '{0} interval is not supported'.format(interval) }
 
-    return json.dumps([{
-        'cost': cost,
-        'interval_length': '1',
+    data = [cost]
+    return json.dumps({
+        'data': data,
+        'interval_length': 1,
         'interval_unit': interval
-    }])
+    })
 
 @app.route('/')
 def welcome():
