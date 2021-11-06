@@ -8,7 +8,6 @@ import pickle
 
 from flask import Flask
 from flask import request
-from flask_cors import CORS, cross_origin
 from influxdb_client import InfluxDBClient
 from keras.models import model_from_json
 
@@ -151,7 +150,7 @@ def welcome():
     return 'API for forecasting LIFX bulb and smart meter data. https://github.com/smannan/LIFXBulbAPI'
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=105)
+    app.run(host='0.0.0.0')
 
 
 
