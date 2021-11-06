@@ -7,3 +7,5 @@ RUN pip install flask-restplus
 RUN pip install flask_cors
 RUN pip install 'statsmodels==0.12.2'
 RUN pip install influxdb_client
+
+CMD [ "python", "api/app.py" ]
