@@ -6,24 +6,21 @@ energy costs for LIFX bulbs and PG&E smart meters.
 
 # Dependencies
 
-Python 3.9.2
+Docker - https://docs.docker.com/get-started/
 
-```
-pip3 install tensorflow
-pip3 install flask-restplus
-pip3 install 'statsmodels==0.12.2'
-pip3 install influxdb_client
-```
+To verify installation:
+1. Start Docker desktop
+2. Rum ```docker run -d -p 80:80 docker/getting-started```
 
 # To run
 
-```python3 api/app.py ```
+```docker compose up```
 
 # Request
 
-```curl 'localhost:105/predict/LIFX/?steps=7&interval=months'```
+```curl 'localhost:5000/predict/LIFX/?steps=7&interval=months'```
 
-```curl 'localhost:105/predict/PGE/?steps=7&interval=days'```
+```curl 'localhost:5000/predict/PGE/?steps=7&interval=days'```
 
 # Response
 
