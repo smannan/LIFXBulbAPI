@@ -42,3 +42,11 @@ To verify installation:
    "interval_unit": "months"
 }
 ```
+
+# Deploy
+
+```
+docker build -t smannan95/lifxbulbapi .
+docker run smannan95/lifxbulbapi
+docker push smannan95/lifxbulbapi
+```
