@@ -52,3 +52,13 @@ docker build -t smannan95/lifxbulbapi .
 docker run -d -p 5000:5000 smannan95/lifxbulbapi
 docker push smannan95/lifxbulbapi
 ```
+
+Deploy on GCP
+
+```https://cloud.google.com/run/docs/quickstarts/build-and-deploy/python```
+
+URL: ```https://lifxbulbapi-dk63ggrjhq-de.a.run.app```
+
+Ex: ```https://lifxbulbapi-dk63ggrjhq-de.a.run.app/predict/PGE/?steps=7&interval=months```
+Ex: ```https://lifxbulbapi-dk63ggrjhq-de.a.run.app/predict/LIFX/?steps=7&interval=months```
+
