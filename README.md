@@ -49,6 +49,6 @@ Push to Docker Hub https://docs.docker.com/docker-hub/
 
 ```
 docker build -t smannan95/lifxbulbapi .
-docker run smannan95/lifxbulbapi
+docker run -d -p 5000:5000 smannan95/lifxbulbapi
 docker push smannan95/lifxbulbapi
 ```

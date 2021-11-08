@@ -150,7 +150,7 @@ def welcome():
     return 'API for forecasting LIFX bulb and smart meter data. https://github.com/smannan/LIFXBulbAPI'
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
 
 
 
